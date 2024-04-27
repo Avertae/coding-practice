@@ -1,4 +1,21 @@
+class Solution {
+    public long countAlternatingSubarrays(int[] nums) {
 
+        int strike = 1;
+        long result = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] == nums[i-1]) {
+                strike = 1;
+                result++;
+            }
+            else 
+                result += ++strike;
+            //dbg(result);
+        }
+            
+        return result;
+
+    }
 void dbg(Object... s){
     var o=System.out;
     for(Object z:s){
@@ -18,4 +35,5 @@ void dbg(Object... s){
             o.print(z+", ");
     }
     o.println();
+}
 }
