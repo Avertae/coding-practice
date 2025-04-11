@@ -1,26 +1,27 @@
     class DSU {
-        Map<Integer, Integer> parent = new HashMap<>();
-        Map<Integer, Integer> size = new HashMap<>();
+        int[] parent;
+        int[] size;
+        int[] rank;
 
-        public void add(int x) {
-            parent.put(x, x);
-            size.put(x, 1);
+        public DSU(int n) {
+            rank = new int[n + 1];
+            size = new int[n + 1];
+            parent = new int[n + 1];
+            for(int i = 0; i <= n; i++) {
+                parent[i] = i;
+            }
         }
 
         public int find(int x) {
-            int px = parent.get(x);
-            if (x != px) 
-                parent.put(x, find(px));
+            int px = parent[x];
+            if (x != px) {
+                px = find(px);
+                parent[x] =px;
+            }
             return px;
         }
 
-        public boolean contains(int x) {
-            return parent.containsKey(x);
-        }
-
-        public void union(Integer x, Integer y) {
-            if (!contains(x) || !contains(y))
-                return;
+        public void unionSize(int x, int y) {
 
             x = find(x);
             y = find(y);
@@ -28,38 +29,50 @@
             if (x == y)
                 return;
 
-            int sx = size.get(x);
-            int sy = size.get(y);
+            int sx = size[x];
+            int sy = size[y];
             if (sx < sy) {
                 int tmp = x;
                 x = y;
                 y = tmp;
             }
-            parent.put(y, x);
-            size.put(x, sx + sy);
+            parent[y] = x;
+            size[x] = sx + sy;
+        }
+
+        public void unionRank(int x, int y) {
+            int px = find(x);
+            int py = find(y);
+            if (px == py) return;
+            if (rank[px] > rank[py]) 
+                parent[py] = px;
+            else if (rank[px] < rank[py]) 
+                parent[px] = py;
+            else {
+                parent[py] = px;
+                rank[px]++;
+            }
         }
 
         public int size(int x) {
-            return size.get(x);
+            return size[x];
         }
 
         public int maxUnion() {
-            return parent.keySet().stream()
-                .mapToInt(x -> size(find(x)))
+            return Arrays.stream(parent)
+                .map(x -> size[find(x)])
                 .max()
                 .orElse(0);
         }
-    }
 
-    /*  
-        for (int x : set) {
-            if (!dsu.contains(x))
-                dsu.add(x);
-            if (dsu.contains(x - 1))
-                dsu.union(x, x - 1);
-            if (dsu.contains(x + 1))
-                dsu.union(x, x + 1);
+        public Collection<Set<Integer>> disjointSets() {
+            var map = new HashMap<Integer, Set<Integer>>();
+            Arrays.stream(parent).forEach(i -> {
+                var key = find(i);
+                var set = map.getOrDefault(key, new HashSet<Integer>());
+                set.add(i);
+                map.putIfAbsent(key, set);
+            });
+            return map.values();
         }
-
-        return dsu.maxUnion(); 
-    */
+    }
